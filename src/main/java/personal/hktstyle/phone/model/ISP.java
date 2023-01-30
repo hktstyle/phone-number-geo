@@ -1,6 +1,8 @@
-package me.ihxq.projects.pna;
+/*
+ * Copyright 2023 易久批信息技术有限公司. All rights reserved.
+ */
 
-import lombok.Getter;
+package personal.hktstyle.phone.model;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -8,10 +10,8 @@ import java.util.Optional;
 /**
  * 运营商
  *
- * @author xq.h
- * on 2019/10/18 20:57
+ * Created by hukaiyang on 01/29/2023
  **/
-@SuppressWarnings("SpellCheckingInspection")
 public enum ISP {
     CHINA_MOBILE("中国移动", 1),
     CHINA_UNICOM("中国联通", 2),
@@ -24,7 +24,6 @@ public enum ISP {
     /**
      * 中文名
      */
-    @Getter
     private final String cnName;
     private final int value;
 
@@ -37,5 +36,9 @@ public enum ISP {
         return Arrays.stream(values())
                 .filter(v -> v.value == value)
                 .findAny();
+    }
+
+    public final String getCnName() {
+        return this.cnName;
     }
 }

@@ -1,9 +1,8 @@
-package me.ihxq.projects.pna.algorithm;
+package personal.hktstyle.phone.algorithm;
 
-import lombok.extern.slf4j.Slf4j;
-import me.ihxq.projects.pna.Attribution;
-import me.ihxq.projects.pna.ISP;
-import me.ihxq.projects.pna.PhoneNumberInfo;
+
+import personal.hktstyle.phone.convert.PhoneNumberInfoConvert;
+import personal.hktstyle.phone.model.PhoneNumberInfo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -11,10 +10,8 @@ import java.util.Arrays;
 import java.util.Optional;
 
 /**
- * @author xq.h
- * 2019/10/19 00:12
+ * Created by hky on Jan 29, 2023
  **/
-@Slf4j
 public class AnotherBinarySearchAlgorithmImpl implements LookupAlgorithm {
     private ByteBuffer originalByteBuffer;
     private int indicesStartOffset;
@@ -47,16 +44,12 @@ public class AnotherBinarySearchAlgorithmImpl implements LookupAlgorithm {
     @SuppressWarnings("DuplicatedCode")
     @Override
     public Optional<PhoneNumberInfo> lookup(String phoneNo) {
-        log.trace("try to resolve attribution of: {}", phoneNo);
         ByteBuffer byteBuffer = originalByteBuffer.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
         if (phoneNo == null) {
-            log.debug("phoneNo is null");
             return Optional.empty();
         }
         int phoneNoLength = phoneNo.length();
         if (phoneNoLength < 7 || phoneNoLength > 11) {
-            log.debug("phoneNo {} is not acceptable, length invalid, length should range 7 to 11, actual: {}",
-                    phoneNo, phoneNoLength);
             return Optional.empty();
         }
 
@@ -64,7 +57,6 @@ public class AnotherBinarySearchAlgorithmImpl implements LookupAlgorithm {
         try {
             attributionIdentity = Integer.parseInt(phoneNo.substring(0, 7));
         } catch (NumberFormatException e) {
-            log.debug("phoneNo {} is invalid, is it numeric?", phoneNo);
             return Optional.empty();
         }
         int left = indicesStartOffset;
@@ -119,7 +111,6 @@ public class AnotherBinarySearchAlgorithmImpl implements LookupAlgorithm {
         int prefix = byteBuffer.getInt();
         int infoStartIndex = byteBuffer.getInt();
         byte ispMark = byteBuffer.get();
-        Optional<ISP> isp = ISP.of(ispMark);
         byteBuffer.position(infoStartIndex);
         int resultBufferSize = 200;
         int increase = 100;
@@ -133,15 +124,8 @@ public class AnotherBinarySearchAlgorithmImpl implements LookupAlgorithm {
                 bytes = Arrays.copyOf(bytes, resultBufferSize);
             }
         }
-        String oriString = new String(bytes, 0, i);
-        String[] split = oriString.split("\\|");
-        Attribution build = Attribution.builder()
-                .province(split[0])
-                .city(split[1])
-                .zipCode(split[2])
-                .areaCode(split[3])
-                .build();
-        return Optional.of(new PhoneNumberInfo(phoneNo, build, isp.orElse(ISP.UNKNOWN)));
+
+        return PhoneNumberInfoConvert.convertToPhoneNumberInfo(phoneNo, bytes, ispMark);
     }
 
     private int compare(int position, int key, ByteBuffer byteBuffer) {

@@ -1,64 +1,32 @@
-# 手机归属地查询
+# 手机归属地查询（重构版） 
 
-[![Maven Central](https://img.shields.io/maven-central/v/me.ihxq.projects/phone-number-geo?color=FE9A2E&label=maven)](https://maven-badges.herokuapp.com/maven-central/me.ihxq.projects/phone-number-geo)
-[![Build Status](https://travis-ci.com/EeeMt/phone-number-geo.svg?branch=master)](https://travis-ci.com/EeeMt/phone-number-geo)
-[![javadoc](https://javadoc.io/badge2/me.ihxq.projects/phone-number-geo/javadoc.svg)](https://javadoc.io/doc/me.ihxq.projects/phone-number-geo)
-[![Coverage Status](https://coveralls.io/repos/github/EeeMt/phone-number-geo/badge.svg?branch=master&service=github&kill_cache=1)](https://coveralls.io/github/EeeMt/phone-number-geo?branch=master)
-![GitHub](https://img.shields.io/github/license/eeemt/phone-number-geo)
 
 ## 简介
+
 根据手机号确定手机号运营商即归属地, 支持包括虚拟运营商的中国大陆手机号查询.
+
+forked from [EeeMt/phone-number-geo](https://github.com/EeeMt/phone-number-geo)
 
 ## 数据源
 
 数据源`dat`文件来自[xluohome/phonedata](https://github.com/xluohome/phonedata)提供的数据库, 会不定时同步更新数据库
 
-当前数据源版本: `202108`
-## maven
-```xml
-<dependency>
-    <groupId>me.ihxq.projects</groupId>
-    <artifactId>phone-number-geo</artifactId>
-    <version>x.x.x-xxxxxx</version>
-</dependency>
-```
-[这里](https://maven-badges.herokuapp.com/maven-central/me.ihxq.projects/phone-number-geo)获取最新版号.  
-
-
-版本号解释:  
-![](./version_explain.png)
+forked from [EeeMt/phone-number-geo](https://github.com/EeeMt/phone-number-geo)
 
 ## 示例
 ```java
 class Demo1{
     public static void main(String[] args){
         PhoneNumberLookup phoneNumberLookup = new PhoneNumberLookup();
-        PhoneNumberInfo found = phoneNumberLookup.lookup("18798896741").orElseThrow(RuntimeException::new);
-    }
-}
-```
-```java
-class Demo2{
-    public static void main(String[] args){
-        PhoneNumberLookup phoneNumberLookup = new PhoneNumberLookup();
-        String province = phoneNumberLookup.lookup("130898976761")
-                        .map(PhoneNumberInfo::getAttribution)
-                        .map(Attribution::getProvince)
-                        .orElse("未知");
-    }
-}
-```
-```java
-class Demo3{
-    public static void main(String[] args){
-        PhoneNumberLookup phoneNumberLookup = new PhoneNumberLookup();
-        PhoneNumberInfo found = phoneNumberLookup.lookup("18798896741").orElseThrow(RuntimeException::new);
-        found.getNumber(); // 18798896741
-        found.getAttribution().getProvince(); // 贵州
-        found.getAttribution().getCity(); // 贵阳
-        found.getAttribution().getZipCode(); // 550000
-        found.getAttribution().getAreaCode(); // 0851
-        found.getIsp(); // ISP.CHINA_MOBILE
+
+        List<String> phones = Arrays.asList("13381112603","15135111980","13410188548", "17705155875", "18587899365", "13614712921", "13369911623", "18308000200");
+
+        phones.forEach(phone -> {
+            PhoneNumberInfo found = phoneNumberLookup.lookup(phone).orElse(null);
+            if (Objects.nonNull(found)) {
+                System.out.println(found.getNumber() + "-" + found.getAttribution().getProvince() + "-" + found.getAttribution().getCity() + "-" + found.getAttribution().getZipCode() + "-" + found.getIsp().getCnName());
+            }
+        });
     }
 }
 ```
@@ -91,7 +59,3 @@ BenchmarkRunner.sequenceLookup              avgt    5  1555265.227 ± 48814.379 
 ## 感谢
 - 感谢[xluohome/phonedata](https://github.com/xluohome/phonedata)共享的数据库
 - 也参考了@fengjiajie 的java实现[fengjiajie/phone-number-geo](https://github.com/fengjiajie/phone-number-geo)
-
-
-## Todo
-- [x] 发布到`maven`中央仓库

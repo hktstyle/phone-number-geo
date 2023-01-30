@@ -1,9 +1,7 @@
-package me.ihxq.projects.pna.algorithm;
+package personal.hktstyle.phone.algorithm;
 
-import lombok.extern.slf4j.Slf4j;
-import me.ihxq.projects.pna.Attribution;
-import me.ihxq.projects.pna.ISP;
-import me.ihxq.projects.pna.PhoneNumberInfo;
+import personal.hktstyle.phone.convert.PhoneNumberInfoConvert;
+import personal.hktstyle.phone.model.PhoneNumberInfo;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -12,11 +10,8 @@ import java.util.Optional;
 /**
  * 二分查找算子
  *
- * @author xq.h
- * 2019/10/19 00:12
+ * Created by hky on 01/29/2023
  **/
-@Slf4j
-@SuppressWarnings("DuplicatedCode")
 public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
     private ByteBuffer originalByteBuffer;
     private int indicesStartOffset;
@@ -49,13 +44,10 @@ public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
 
     private boolean isInvalidPhoneNumber(String phoneNumber) {
         if (phoneNumber == null) {
-            log.debug("phone number is null");
             return true;
         }
         int phoneNumberLength = phoneNumber.length();
         if (phoneNumberLength < 7 || phoneNumberLength > 11) {
-            log.debug("phone number {} is not acceptable, length invalid, length should be 11 or 7(for left 7 numbers), actual: {}",
-                    phoneNumber, phoneNumberLength);
             return true;
         }
         return false;
@@ -63,7 +55,6 @@ public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
 
     @Override
     public Optional<PhoneNumberInfo> lookup(String phoneNumber) {
-        log.trace("try to resolve attribution of phone number: {}", phoneNumber);
         ByteBuffer byteBuffer = originalByteBuffer.asReadOnlyBuffer().order(ByteOrder.LITTLE_ENDIAN);
         if (isInvalidPhoneNumber(phoneNumber)) {
             return Optional.empty();
@@ -72,7 +63,6 @@ public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
         try {
             attributionIdentity = Integer.parseInt(phoneNumber.substring(0, 7));
         } catch (NumberFormatException e) {
-            log.debug("phone number {} is invalid, is it numeric?", phoneNumber);
             return Optional.empty();
         }
         int left = indicesStartOffset;
@@ -107,14 +97,11 @@ public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
         int prefix = byteBuffer.getInt(); // it is necessary
         int infoStartIndex = byteBuffer.getInt();
         byte ispMark = byteBuffer.get();
-        ISP isp = ISP.of(ispMark).orElse(ISP.UNKNOWN);
 
         byte[] bytes = new byte[determineInfoLength(infoStartIndex, byteBuffer)];
         byteBuffer.get(bytes);
-        String oriString = new String(bytes);
-        Attribution attribution = parse(oriString);
 
-        return Optional.of(new PhoneNumberInfo(phoneNumber, attribution, isp));
+        return PhoneNumberInfoConvert.convertToPhoneNumberInfo(phoneNumber, bytes, ispMark);
     }
 
     private int determineInfoLength(int infoStartIndex, ByteBuffer byteBuffer) {
@@ -126,19 +113,6 @@ public class BinarySearchAlgorithmImpl implements LookupAlgorithm {
         int infoEnd = byteBuffer.position() - 1;
         byteBuffer.position(infoStartIndex); //reset to info start index
         return infoEnd - infoStartIndex;
-    }
-
-    private Attribution parse(String ori) {
-        String[] split = ori.split("\\|");
-        if (split.length < 4) {
-            throw new IllegalStateException("content format error");
-        }
-        return Attribution.builder()
-                .province(split[0])
-                .city(split[1])
-                .zipCode(split[2])
-                .areaCode(split[3])
-                .build();
     }
 
     private int compare(int position, int key, ByteBuffer byteBuffer) {

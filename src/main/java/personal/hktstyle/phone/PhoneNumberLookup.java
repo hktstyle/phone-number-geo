@@ -1,8 +1,10 @@
-package me.ihxq.projects.pna;
+package personal.hktstyle.phone;
 
-import lombok.extern.slf4j.Slf4j;
-import me.ihxq.projects.pna.algorithm.BinarySearchAlgorithmImpl;
-import me.ihxq.projects.pna.algorithm.LookupAlgorithm;
+
+
+import personal.hktstyle.phone.algorithm.BinarySearchAlgorithmImpl;
+import personal.hktstyle.phone.algorithm.LookupAlgorithm;
+import personal.hktstyle.phone.model.PhoneNumberInfo;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -14,17 +16,15 @@ import static java.util.Objects.requireNonNull;
 /**
  * 电话号码归属信息查询
  *
- * @author xq.h
- * 2019/10/18 21:25
+ * Created by hky on 01/29/2023
  **/
-@Slf4j
 public class PhoneNumberLookup {
     private static final String PHONE_NUMBER_GEO_PHONE_DAT = "phone.dat";
     private final LookupAlgorithm lookupAlgorithm;
     /**
      * 数据版本hash值, 版本:202108
      */
-    private static final int dataHash = -2145792333;
+    private static final int DATA_HASH = -2145792333;
 
     private void init() {
         try {
@@ -39,13 +39,11 @@ public class PhoneNumberLookup {
                 allBytes = output.toByteArray();
             }
             int hashCode = Arrays.hashCode(allBytes);
-            log.debug("loaded datasource, size: {}, hash: {}", allBytes.length, hashCode);
-            if (hashCode != dataHash) {
-                throw new IllegalStateException("Hash of data not match, expect: " + dataHash + ", actually: " + hashCode);
+            if (hashCode != DATA_HASH) {
+                throw new IllegalStateException("Hash of data not match, expect: " + DATA_HASH + ", actually: " + hashCode);
             }
             lookupAlgorithm.loadData(allBytes);
         } catch (Exception e) {
-            log.error("failed to init PhoneNumberLookUp", e);
             throw new RuntimeException(e);
         }
     }

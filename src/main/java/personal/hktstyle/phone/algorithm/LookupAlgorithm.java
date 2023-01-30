@@ -1,14 +1,14 @@
-package me.ihxq.projects.pna.algorithm;
+package personal.hktstyle.phone.algorithm;
 
-import me.ihxq.projects.pna.PhoneNumberInfo;
+
+import personal.hktstyle.phone.model.PhoneNumberInfo;
 
 import java.util.Optional;
 
 /**
  * 查找算子
  *
- * @author xq.h
- * on 2019/10/18 21:24
+ * Created by hky on 01/29/2023
  **/
 public interface LookupAlgorithm {
 
